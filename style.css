@@ -1,0 +1,296 @@
+/* ============================================================
+   BlocNav : style de l'interface (inspiré des menus « blocs »)
+   ============================================================ */
+
+/* Police pixel « Tiny5 » (licence libre OFL, fichiers dans fonts/) */
+@font-face {
+  font-family: 'Tiny5';
+  src: url('fonts/tiny5.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Tiny5';
+  src: url('fonts/tiny5-ext.woff2') format('woff2');
+  unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  font-display: swap;
+}
+
+:root {
+  --gui: #c6c6c6;          /* fond des panneaux */
+  --gui-light: #ffffff;    /* arête éclairée */
+  --gui-dark: #555555;     /* arête dans l'ombre */
+  --ink: #2f2f2f;          /* texte foncé */
+  --ink-soft: #5b5b5b;
+  --btn: #7e7e7e;          /* boutons */
+  --btn-light: #b0b0b0;
+  --btn-dark: #4a4a4a;
+  --green: #5d9b34;
+  --green-light: #8fd15a;
+  --green-dark: #355f1c;
+  --red: #e8322a;
+  --field: #111111;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: #2b2b2b;
+  color: var(--ink);
+  font-family: 'Tiny5', ui-monospace, monospace;
+  font-size: 17px;
+  font-synthesis: none; /* pas de faux gras : la police pixel reste nette */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+
+/* Images en pixel-art : jamais lissées */
+img.px, .px { image-rendering: pixelated; image-rendering: crisp-edges; }
+
+/* ---------- Carte ---------- */
+#map { position: fixed; inset: 0; background: #5f8f3e; }
+
+/* La carte est dessinée en basse résolution puis agrandie sans lissage :
+   effet « gros pixels » ET moins de travail pour le téléphone. */
+.maplibregl-canvas { image-rendering: pixelated; }
+:root[data-pixel="off"] .maplibregl-canvas { image-rendering: auto; }
+
+/* ---------- Écran de chargement ---------- */
+.splash {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: #2b2b2b; color: #fff; text-shadow: 2px 2px 0 #000;
+  transition: opacity .3s;
+}
+.splash img { width: 96px; height: 96px; image-rendering: pixelated; }
+.splash.hide { opacity: 0; pointer-events: none; }
+.splash p { margin: 16px 24px; text-align: center; max-width: 320px; line-height: 1.4; }
+
+/* ---------- Panneaux (bord noir + biseau clair/sombre) ---------- */
+.panel {
+  background: var(--gui);
+  border: 2px solid #000;
+  box-shadow: inset 2px 2px 0 var(--gui-light), inset -2px -2px 0 var(--gui-dark);
+  border-radius: 2px;
+}
+
+/* ---------- Boutons ---------- */
+.mc-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 6px 12px;
+  background: var(--btn);
+  color: #fff; text-shadow: 2px 2px 0 #3a3a3a;
+  border: 2px solid #000;
+  box-shadow: inset 2px 2px 0 var(--btn-light), inset -2px -3px 0 var(--btn-dark);
+  border-radius: 0;
+}
+.mc-btn:active { background: #6a6a6a; box-shadow: inset 2px 2px 0 var(--btn-dark), inset -2px -2px 0 var(--btn-light); }
+.mc-btn img { width: 28px; height: 28px; }
+.mc-btn.square { width: 52px; height: 52px; padding: 0; }
+.mc-btn.square img { width: 34px; height: 34px; }
+.mc-btn.wide { display: flex; width: 100%; margin-top: 8px; }
+.mc-btn.green, .mc-btn.selected {
+  background: var(--green);
+  box-shadow: inset 2px 2px 0 var(--green-light), inset -2px -3px 0 var(--green-dark);
+}
+.mc-btn.selected { outline: 2px solid #fff; outline-offset: -5px; }
+.mc-btn:disabled { opacity: .6; }
+
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; padding: 0;
+  background: transparent; border: 0;
+}
+.icon-btn img { width: 24px; height: 24px; }
+.icon-btn.dark img { filter: brightness(.25); }
+
+.link-btn {
+  background: none; border: 0; padding: 4px 6px;
+  color: #1f4fa8; text-decoration: underline; text-underline-offset: 3px;
+}
+
+/* ---------- Barre de recherche ---------- */
+.top {
+  position: fixed; z-index: 20;
+  top: calc(var(--safe-top) + 10px);
+  left: calc(var(--safe-left) + 10px);
+  right: calc(var(--safe-right) + 72px);
+  max-width: 520px;
+}
+.search {
+  display: flex; align-items: center; gap: 6px;
+  height: 52px; padding: 0 4px 0 10px;
+  background: var(--field);
+  border: 2px solid #000;
+  box-shadow: inset 0 0 0 2px #a0a0a0;
+}
+.search img.px { width: 26px; height: 26px; flex: none; }
+.search input {
+  flex: 1; min-width: 0; height: 100%;
+  background: transparent; border: 0; outline: 0;
+  color: #fff; font-size: 18px;
+  -webkit-user-select: text; user-select: text;
+}
+.search input::placeholder { color: #a8a8a8; }
+.search input::-webkit-search-cancel-button { display: none; }
+
+.search-title {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 6px; padding: 6px 10px;
+  background: rgba(0, 0, 0, .75); color: #fff; text-shadow: 2px 2px 0 #000;
+}
+.search-title .link-btn { color: #9fd3ff; }
+
+.results {
+  margin: 6px 0 0; padding: 4px; list-style: none;
+  max-height: calc(100dvh - 120px - var(--safe-top)); overflow-y: auto;
+}
+.results li {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 8px; min-height: 52px;
+  border-bottom: 2px solid #a9a9a9;
+}
+.results li:last-child { border-bottom: 0; }
+.results li.clickable:active { background: #b2b2b2; }
+.results li img { width: 28px; height: 28px; flex: none; }
+.results .r-title { font-weight: 700; }
+.results .r-sub, .sub { color: var(--ink-soft); font-size: 14px; margin-top: 2px; }
+.results li.info { color: var(--ink-soft); justify-content: center; }
+
+/* ---------- Boutons flottants ---------- */
+.fabs {
+  position: fixed; z-index: 15;
+  top: calc(var(--safe-top) + 10px);
+  right: calc(var(--safe-right) + 10px);
+  display: flex; flex-direction: column; gap: 10px;
+}
+#compass-img { transition: transform .15s linear; }
+
+/* ---------- Panneau d'itinéraire ---------- */
+.sheet {
+  position: fixed; z-index: 25;
+  left: calc(var(--safe-left) + 8px);
+  right: calc(var(--safe-right) + 8px);
+  bottom: calc(var(--safe-bottom) + 8px);
+  max-height: 58dvh; overflow-y: auto;
+  padding: 10px 12px 12px;
+}
+.sheet-head { display: flex; align-items: flex-start; gap: 10px; }
+.dest-icon { width: 32px; height: 32px; flex: none; margin-top: 2px; }
+.dest-text { flex: 1; min-width: 0; }
+.dest-name { font-weight: 700; font-size: 19px; overflow-wrap: anywhere; }
+.origin-row {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  margin: 8px 0 10px; font-size: 15px;
+}
+.origin-row img.small { width: 20px; height: 20px; }
+.origin-row b { overflow-wrap: anywhere; }
+
+.modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.modes .mc-btn { flex-direction: column; gap: 2px; padding: 6px 4px; font-size: 15px; min-height: 64px; }
+
+.summary {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px;
+  margin-top: 12px; min-height: 30px;
+}
+.summary .big { font-size: 26px; font-weight: 700; color: #1d5e12; }
+.summary .mid { font-size: 19px; font-weight: 700; }
+.summary .eta { color: var(--ink-soft); }
+.summary .note { width: 100%; font-size: 13px; color: var(--ink-soft); }
+.summary .err { color: #9d1c14; font-weight: 700; }
+.summary .loading::after { content: ''; animation: dots 1s steps(4) infinite; }
+@keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+
+.steps { list-style: none; margin: 10px 0 0; padding: 0; }
+.steps li {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 4px; border-top: 2px solid #a9a9a9;
+}
+.steps li:active { background: #b2b2b2; }
+.steps .s-icon {
+  width: 34px; height: 34px; flex: none; padding: 3px;
+  background: #3a3a3a; border: 2px solid #000;
+}
+.steps .s-icon img { width: 24px; height: 24px; display: block; }
+.steps .s-text { flex: 1; }
+.steps .s-dist { color: var(--ink-soft); font-size: 14px; white-space: nowrap; }
+
+/* ---------- Réglages ---------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 40;
+  display: flex; align-items: center; justify-content: center;
+  padding: calc(var(--safe-top) + 12px) 12px calc(var(--safe-bottom) + 12px);
+  background: rgba(0, 0, 0, .55);
+}
+.dialog { width: 100%; max-width: 460px; max-height: 100%; display: flex; flex-direction: column; }
+.dialog-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 8px 4px 14px;
+}
+.dialog-head h2 { margin: 0; font-size: 22px; }
+.dialog-body { overflow-y: auto; padding: 0 14px 14px; }
+.dialog h3 {
+  margin: 18px 0 6px; font-size: 18px;
+  padding-bottom: 4px; border-bottom: 2px solid #8b8b8b;
+}
+.field-label { margin: 10px 0 6px; font-size: 15px; }
+.choice { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.choice .mc-btn { padding: 4px; font-size: 15px; }
+.pack-row { display: flex; align-items: center; gap: 10px; }
+.pack-icon { width: 48px; height: 48px; flex: none; background: #8b8b8b; border: 2px solid #000; }
+.hint { font-size: 13px; color: var(--ink-soft); margin: 8px 0 0; }
+.about { font-size: 14px; line-height: 1.45; margin: 4px 0 0; }
+
+/* ---------- Message temporaire ---------- */
+.toast {
+  position: fixed; z-index: 60;
+  /* sous la barre de recherche, sans cacher les boutons de droite */
+  left: calc(var(--safe-left) + 10px);
+  right: calc(var(--safe-right) + 72px);
+  top: calc(var(--safe-top) + 72px);
+  max-width: 520px;
+  padding: 8px 14px;
+  background: rgba(0, 0, 0, .78); color: #fff; text-shadow: 2px 2px 0 #000;
+  font-size: 16px; text-align: center; line-height: 1.35;
+  pointer-events: none;
+}
+
+/* ---------- Attribution ---------- */
+.osm-credit {
+  position: fixed; z-index: 10;
+  left: calc(var(--safe-left) + 4px); bottom: calc(var(--safe-bottom) + 2px);
+  padding: 1px 5px; border: 0;
+  background: rgba(255, 255, 255, .72); color: #222;
+  font-family: system-ui, sans-serif; font-size: 11px;
+}
+body.has-sheet .osm-credit { display: none; }
+/* Quand le panneau du bas est ouvert, l'attribution s'affiche dedans. */
+.sheet-credit { margin-top: 8px; text-align: right; font-family: system-ui, sans-serif; font-size: 11px; color: #444; }
+
+/* ---------- Marqueur de position ---------- */
+.player-marker { width: 34px; height: 34px; pointer-events: none; }
+.player-marker img { width: 100%; height: 100%; image-rendering: pixelated; display: block; }
+.player-marker.stale { opacity: .5; }
+
+/* ---------- Écran en paysage (support voiture) ---------- */
+@media (orientation: landscape) and (max-height: 560px) {
+  .sheet {
+    right: auto; width: 380px;
+    top: calc(var(--safe-top) + 72px);
+    max-height: none;
+  }
+  .top { max-width: 380px; }
+  .toast { left: calc(var(--safe-left) + 400px); top: calc(var(--safe-top) + 10px); }
+}

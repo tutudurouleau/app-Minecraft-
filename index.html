@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#2b2b2b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>BlocNav</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/favicon.png">
+  <link rel="stylesheet" href="lib/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- La carte occupe tout l'écran -->
+  <div id="map"></div>
+
+  <!-- Écran de chargement -->
+  <div id="splash" class="splash">
+    <img src="icons/icon-192.png" alt="">
+    <p id="splash-text">Chargement du monde…</p>
+  </div>
+
+  <!-- Barre de recherche + résultats -->
+  <div id="top" class="top">
+    <div id="search-title" class="search-title" hidden>
+      <span>Choisir le point de départ</span>
+      <button type="button" id="search-cancel" class="link-btn">Annuler</button>
+    </div>
+    <form id="search-form" class="search" autocomplete="off" role="search">
+      <img src="textures/icons/search.png" alt="" class="px">
+      <input id="search-input" type="search" placeholder="Où va-t-on ?" enterkeyhint="search" autocomplete="off" spellcheck="false">
+      <button type="button" id="search-clear" class="icon-btn" hidden aria-label="Effacer">
+        <img src="textures/icons/close.png" alt="" class="px">
+      </button>
+    </form>
+    <ul id="results" class="panel results" hidden></ul>
+  </div>
+
+  <!-- Boutons flottants à droite -->
+  <div id="fabs" class="fabs">
+    <button id="btn-compass" class="mc-btn square" hidden aria-label="Remettre le nord en haut">
+      <img id="compass-img" src="textures/icons/compass.png" alt="" class="px">
+    </button>
+    <button id="btn-locate" class="mc-btn square" aria-label="Ma position">
+      <img src="textures/icons/locate.png" alt="" class="px">
+    </button>
+    <button id="btn-settings" class="mc-btn square" aria-label="Réglages">
+      <img src="textures/icons/gear.png" alt="" class="px">
+    </button>
+  </div>
+
+  <!-- Panneau d'itinéraire (en bas) -->
+  <section id="route-panel" class="panel sheet" hidden>
+    <div class="sheet-head">
+      <img src="textures/icons/pin.png" alt="" class="px dest-icon">
+      <div class="dest-text">
+        <div id="dest-name" class="dest-name"></div>
+        <div id="dest-sub" class="sub"></div>
+      </div>
+      <button id="route-close" class="icon-btn dark" aria-label="Fermer l'itinéraire">
+        <img src="textures/icons/close.png" alt="" class="px">
+      </button>
+    </div>
+
+    <div class="origin-row">
+      <img src="textures/icons/flag-start.png" alt="" class="px small">
+      <span>Départ :</span>
+      <b id="origin-name">Ma position</b>
+      <button id="origin-change" class="link-btn">Changer</button>
+    </div>
+
+    <div class="modes" role="radiogroup" aria-label="Mode de déplacement">
+      <button class="mc-btn mode" data-mode="car" role="radio"><img src="textures/icons/car.png" alt="" class="px"><span>Voiture</span></button>
+      <button class="mc-btn mode" data-mode="bike" role="radio"><img src="textures/icons/bike.png" alt="" class="px"><span>Vélo</span></button>
+      <button class="mc-btn mode" data-mode="foot" role="radio"><img src="textures/icons/walk.png" alt="" class="px"><span>À pied</span></button>
+    </div>
+
+    <div id="route-summary" class="summary"></div>
+
+    <button id="btn-steps" class="mc-btn wide" hidden>
+      <img src="textures/icons/list.png" alt="" class="px"><span id="btn-steps-label">Voir les étapes</span>
+    </button>
+    <ol id="steps" class="steps" hidden></ol>
+    <div class="sheet-credit">© OpenStreetMap contributors</div>
+  </section>
+
+  <!-- Réglages -->
+  <div id="settings" class="overlay" hidden>
+    <div class="panel dialog" role="dialog" aria-labelledby="settings-title">
+      <div class="dialog-head">
+        <h2 id="settings-title">Réglages</h2>
+        <button id="settings-close" class="icon-btn dark" aria-label="Fermer">
+          <img src="textures/icons/close.png" alt="" class="px">
+        </button>
+      </div>
+
+      <div class="dialog-body">
+        <h3>Textures</h3>
+        <div class="pack-row">
+          <img id="pack-icon" src="textures/icons/texture-pack.png" alt="" class="px pack-icon">
+          <div>
+            <div id="pack-name">Textures originales</div>
+            <div id="pack-info" class="sub">Dessinées pour BlocNav</div>
+          </div>
+        </div>
+        <button id="btn-pack-import" class="mc-btn wide">Importer un pack (.zip / .jar)</button>
+        <button id="btn-pack-reset" class="mc-btn wide" hidden>Revenir aux textures originales</button>
+        <input id="pack-file" type="file" hidden>
+        <p class="hint">Le pack reste uniquement sur ce téléphone : il n'est jamais envoyé sur Internet.</p>
+
+        <h3>Affichage</h3>
+        <div class="field-label">Pixelisation de la carte</div>
+        <div class="choice" data-setting="pixelation">
+          <button class="mc-btn" data-value="strong">Forte</button>
+          <button class="mc-btn" data-value="medium">Moyenne</button>
+          <button class="mc-btn" data-value="off">Aucune</button>
+        </div>
+        <div class="field-label">Taille des blocs</div>
+        <div class="choice" data-setting="blockSize">
+          <button class="mc-btn" data-value="small">Petits</button>
+          <button class="mc-btn" data-value="medium">Moyens</button>
+          <button class="mc-btn" data-value="large">Grands</button>
+        </div>
+
+        <h3>Hors-ligne</h3>
+        <p id="cache-info" class="sub">Calcul…</p>
+        <button id="btn-cache-clear" class="mc-btn wide">Vider le cache de la carte</button>
+        <button id="btn-install" class="mc-btn wide green" hidden>Installer l'application</button>
+
+        <h3>À propos</h3>
+        <p class="about">
+          <b>BlocNav</b> <span id="app-version"></span><br>
+          Projet perso, gratuit.<br><br>
+          Carte : © OpenStreetMap contributors, tuiles OpenFreeMap / OpenMapTiles.<br>
+          Recherche : Photon (komoot). Itinéraires : OSRM, serveurs FOSSGIS.<br>
+          Moteur de carte : MapLibre GL JS. Police : Tiny5.<br>
+          Les durées sont théoriques (pas de trafic en direct).
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message temporaire (style « barre d'action ») -->
+  <div id="toast" class="toast" hidden></div>
+
+  <!-- Attribution obligatoire, toujours visible -->
+  <button id="osm-credit" class="osm-credit">© OpenStreetMap contributors</button>
+
+  <script src="config.js"></script>
+  <script src="lib/maplibre-gl.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
