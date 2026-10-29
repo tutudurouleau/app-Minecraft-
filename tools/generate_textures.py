@@ -379,6 +379,15 @@ PAL = {
     'b': '#3C7BD9', 'B': '#23498C', 'c': '#8FDDF0', 'n': '#8A5A2B', 'N': '#5A3818',
     't': '#D9A55B', 'l': '#6CC24A', 'L': '#2F8A2A', 's': '#E9B88E', 'p': '#F08AB0',
     'v': '#9B6FD6',
+    # Couleurs pour les icônes « objets Minecraft » (dessins originaux, pas les
+    # images du jeu) : émeraude, diamant, potion, lave, élytre, papier, cuivre.
+    'E': '#15C060', 'e': '#0E8C44',  # émeraude
+    'D': '#4FE6E6', 'u': '#2FAFC2',  # diamant
+    'M': '#D91FA8', 'm': '#8C1070',  # potion (magenta)
+    'a': '#FF8A1E', 'A': '#D9430A',  # lave
+    'W': '#6B5B7A', 'x': '#4A3D59',  # élytre
+    'h': '#EDE4C8', 'H': '#C9BC94',  # papier
+    'F': '#B98A3D', 'f': '#8A6225',  # cuivre (longue-vue)
 }
 
 
@@ -528,10 +537,13 @@ def ic_walk():
 
 
 def ic_search():
+    """Longue-vue (comme l'objet « longue-vue » du jeu)."""
     p = Pix()
-    p.ring(6.5, 6.5, 3.2, 5.2, 'g')
-    p.ring(6.5, 6.5, 0, 3.2, 'c')
-    p.line(10, 10, 14, 14, 'n', w=3)
+    p.line(2, 13, 11, 4, 'F', w=3)   # tube en cuivre, en diagonale
+    p.line(2, 13, 10, 5, 'f', w=1)   # ombre sur un bord du tube
+    p.rect(9, 1, 13, 5, 'f')         # bague de l'objectif
+    p.rect(10, 2, 12, 4, 'c')        # verre
+    p.rect(1, 12, 3, 14, 'd')        # œilleton
     return p.img
 
 
@@ -575,12 +587,20 @@ def ic_list():
 
 
 def ic_compass():
+    """Boussole (comme l'objet « boussole » du jeu) : boîtier gris, aiguille
+    rouge vers le nord, blanche vers le sud."""
     p = Pix()
-    for y in range(16):
-        for x in range(16):
-            dx, dy = abs(x + .5 - 8), y + .5 - 8
-            if dx <= (7.5 - abs(dy)) / 1.5:
-                p.dot(x, y, 'r' if dy < 0 else 'w')
+    p.rect(3, 2, 12, 13, 'g')
+    for x, y in [(2, 3), (2, 12), (13, 3), (13, 12)]:
+        p.dot(x, y, 'g')
+    p.rect(4, 3, 11, 12, 'd')
+    p.dot(7, 4, 'r')
+    p.dot(8, 4, 'r')
+    p.rect(6, 5, 9, 7, 'r')
+    p.rect(6, 8, 9, 10, 'w')
+    p.dot(7, 11, 'w')
+    p.dot(8, 11, 'w')
+    p.rect(7, 7, 8, 8, 'g')
     return p.img
 
 
@@ -695,107 +715,125 @@ def ic_roundabout():
 # --- Icônes de lieux ------------------------------------------------------------
 
 def ic_food():
+    """Pilon de poulet (comme la barre de faim du jeu)."""
     return from_ascii([
         '................',
-        '................',
-        '....tttttttt....',
-        '..tttwttttwttt..',
-        '.tttttttttwtttt.',
-        '.tttttttttttttt.',
-        '.llllllllllllll.',
-        '..yyyyyyyyyyyy..',
-        '.NNNNNNNNNNNNNN.',
-        '.NNNNNNNNNNNNNN.',
-        '.tttttttttttttt.',
-        '..tttttttttttt..',
+        '.......nnnn.....',
+        '......nNNNNn....',
+        '.....nNNttNNn...',
+        '.....nNttttNn...',
+        '.....nNNttNNn...',
+        '......nNNNNn....',
+        '.......Nnnn.....',
+        '........nn......',
+        '.........ww.....',
+        '..........ww....',
+        '...........ww...',
+        '............w...',
     ])
 
 
 def ic_cafe():
+    """Potion de soin (fiole magenta, comme dans le jeu)."""
     return from_ascii([
         '................',
-        '....g..g..g.....',
-        '.....g..g..g....',
-        '....g..g..g.....',
-        '................',
-        '..wwwwwwwwww....',
-        '..wnnnnnnnnwww..',
-        '..wwwwwwwwww.w..',
-        '..wwwwwwwwww.w..',
-        '..wwwwwwwwwwww..',
-        '..wwwwwwwwww....',
-        '...wwwwwwww.....',
-        '....wwwwww......',
-        '.gggggggggggg...',
+        '.......nn.......',
+        '.......nn.......',
+        '......gggg......',
+        '.....gMMMMg.....',
+        '....gMMmMMMg....',
+        '....gMMMMMmg....',
+        '....gmMMMMMg....',
+        '....gMMMmMMg....',
+        '.....gMMMMg.....',
+        '.....gggggg.....',
+        '......gggg......',
     ])
 
 
 def ic_fuel():
+    """Seau de lave (comme l'objet du jeu)."""
     return from_ascii([
         '................',
-        '..rrrrrrr.......',
-        '..rrrrrrr.dd....',
-        '..rwwwwwr..d....',
-        '..rwwwwwr..d....',
-        '..rrrrrrrdd.d...',
-        '..rrrrrrr...d...',
-        '..rrrrrrr..dd...',
-        '..rrrrrrr.dd....',
-        '..rrrrrrrdd.....',
-        '..rrrrrrr.......',
-        '..rrrrrrr.......',
-        '.GGGGGGGGG......',
-        '.ddddddddd......',
+        '....gg....gg....',
+        '...g..ggggg..g..',
+        '...g.aaaaaa.g...',
+        '...g.aAaaAa.g...',
+        '....gaaaaaag....',
+        '....gAaaaaAg....',
+        '.....gaaaag.....',
+        '.....gAaaAg.....',
+        '......gggg......',
     ])
 
 
 def ic_shop():
+    """Émeraude (comme la gemme du jeu)."""
     return from_ascii([
         '................',
-        '......kkkk......',
-        '.....k....k.....',
-        '.....k....k.....',
-        '...yyyyyyyyyy...',
-        '...yyyyyyyyyy...',
-        '...yyykyykyyy...',
-        '...yyyyyyyyyy...',
-        '...yyyyyyyyyy...',
-        '...YYYYYYYYYY...',
-        '...yyyyyyyyyy...',
-        '...yyyyyyyyyy...',
-        '...YYYYYYYYYY...',
+        '.......EE.......',
+        '......EeeE......',
+        '.....EeEEeE.....',
+        '....EeEEEEeE....',
+        '...EeEEEEEEeE...',
+        '....eEEEEEEe....',
+        '.....eEEEEe.....',
+        '......eEEe......',
+        '.......ee.......',
     ])
 
 
 def ic_parking():
-    rows = []
-    p_shape = [
-        '..............',
-        '..wwwwwww.....',
-        '..wwwwwwww....',
-        '..ww....www...',
-        '..ww.....ww...',
-        '..ww....www...',
-        '..wwwwwwww....',
-        '..wwwwwww.....',
-        '..ww..........',
-        '..ww..........',
-        '..ww..........',
-        '..ww..........',
-        '..............',
-    ]
-    for y in range(14):
-        inner = p_shape[y] if y < len(p_shape) else '..............'
-        rows.append('.' + ''.join('b' if ch == '.' else ch for ch in inner) + '.')
-    return from_ascii(['................'] + rows)
+    """Panneau en bois (comme l'objet « pancarte » du jeu)."""
+    return from_ascii([
+        '................',
+        '................',
+        '..tttttttttttt..',
+        '.ttttttttttttttt',
+        '.tNtttttttttNtt.',
+        '.tttttttttttttt.',
+        '.tttttttttttttt.',
+        '.tNtttttttttNtt.',
+        '.ttttttttttttttt',
+        '..tttttttttttt..',
+        '.......NN.......',
+        '.......NN.......',
+        '.......NN.......',
+        '.......NN.......',
+    ])
 
 
-def ic_cross(color):
-    p = Pix()
-    p.rect(1, 1, 14, 14, 'w')
-    p.rect(6, 3, 9, 12, color)
-    p.rect(3, 6, 12, 9, color)
-    return p.img
+def ic_half_heart():
+    """Demi-cœur (comme la barre de vie du jeu)."""
+    return from_ascii([
+        '................',
+        '.rrr...ggg......',
+        'rrrrr.ggggg.....',
+        'rrrrrrgggggg....',
+        'rrrrrrgggggg....',
+        '.rrrrrggggg.....',
+        '..rrrrgggg......',
+        '...rrrggg.......',
+        '....rrgg........',
+        '.....rg.........',
+        '......g.........',
+    ])
+
+
+def ic_heart():
+    """Cœur plein (comme la barre de vie du jeu)."""
+    return from_ascii([
+        '................',
+        '.RR.....RR......',
+        'RrrR...RrrR.....',
+        'RrrrRRRrrrR.....',
+        'RrrrrrrrrrR.....',
+        '.RrrrrrrrR......',
+        '..RrrrrrR.......',
+        '...RrrrR........',
+        '....Rrr.........',
+        '.....R..........',
+    ])
 
 
 def ic_hotel():
@@ -810,90 +848,86 @@ def ic_hotel():
 
 
 def ic_school():
+    """Feuille de papier (comme l'objet du jeu)."""
     return from_ascii([
         '................',
-        '..bbbbbbbbbbb...',
-        '..bbbbbbbbbbbb..',
-        '..bbbbbbbbbbbb..',
-        '..bbwwwwwwwbbb..',
-        '..bbbbbbbbbbbb..',
-        '..bbbbbbbbbbbb..',
-        '..bbbbbbbbbbbb..',
-        '..bbbbbbbbbbbb..',
-        '..bbbbbbbbbbbb..',
-        '..Bwwwwwwwwwwww.',
-        '..BBBBBBBBBBBBB.',
+        '...hhhhhhhhhh...',
+        '...hhhhhhhhhH...',
+        '...hhhhhhhhHH...',
+        '...hhhhhhhhhh...',
+        '...hHHHHHHhhh...',
+        '...hhhhhhhhhh...',
+        '...hHHHHHhhhh...',
+        '...hhhhhhhhhh...',
+        '...hHHHHHHhhh...',
+        '...hhhhhhhhhh...',
+        '...hhhhhhhhhh...',
     ])
 
 
 def ic_bank():
-    p = Pix()
-    p.ring(8, 8, 0, 7.2, 'Y')
-    p.ring(8, 8, 0, 5.8, 'y')
-    euro = [
-        '..YYY',
-        '.Y...',
-        'YYYY.',
-        '.Y...',
-        'YYYY.',
-        '.Y...',
-        '..YYY',
-    ]
-    for y, row in enumerate(euro):
-        for x, ch in enumerate(row):
-            if ch != '.':
-                p.dot(6 + x, 4 + y, ch)
-    return p.img
+    """Diamant (comme la gemme du jeu)."""
+    return from_ascii([
+        '................',
+        '.......DD.......',
+        '......DuuD......',
+        '.....DuDDuD.....',
+        '....DuDDDDuD....',
+        '...DuDDDDDDuD...',
+        '....uDDDDDDu....',
+        '.....uDDDDu.....',
+        '......uDDu......',
+        '.......uu.......',
+    ])
 
 
 def ic_bus():
+    """Wagonnet / minecart (comme l'objet du jeu)."""
     return from_ascii([
         '................',
-        '..bbbbbbbbbbbb..',
-        '..bccccccccccb..',
-        '..bccccccccccb..',
-        '..bccccccccccb..',
-        '..bbbbbbbbbbbb..',
-        '..bbbbbbbbbbbb..',
-        '..bybbbbbbbbyb..',
-        '..bbbbbbbbbbbb..',
-        '..dddddddddddd..',
-        '...dd......dd...',
+        '................',
+        '..gggggggggggg..',
+        '.gGGGGGGGGGGGGg.',
+        '.gGddddddddddGg.',
+        '.gGdddddddddddg.',
+        '.gGddddddddddGg.',
+        '.gGGGGGGGGGGGGg.',
+        '..gg........gg..',
+        '.ggg........ggg.',
     ])
 
 
 def ic_train():
+    """Rail (comme l'objet du jeu), pour les gares."""
     return from_ascii([
         '................',
-        '....rrrrrrrr....',
-        '...rrrrrrrrrr...',
-        '...rccccccccr...',
-        '...rccccccccr...',
-        '...rrrrrrrrrr...',
-        '...rrrrrrrrrr...',
-        '...ryrrrrrryr...',
-        '...rrrrrrrrrr...',
-        '....dddddddd....',
-        '...d........d...',
-        '..GGGGGGGGGGGG..',
+        '..NN......NN....',
+        '..NN......NN....',
+        'gggggggggggggggg',
+        'GGGGGGGGGGGGGGGG',
+        '..NN......NN....',
+        '..NN......NN....',
+        'gggggggggggggggg',
+        'GGGGGGGGGGGGGGGG',
+        '..NN......NN....',
+        '..NN......NN....',
     ])
 
 
 def ic_star():
+    """Élytre (comme l'objet du jeu), pour les monuments / attractions."""
     return from_ascii([
-        '.......y........',
-        '.......y........',
-        '......yyy.......',
-        '......yyy.......',
-        '.yyyyyyyyyyyyy..',
-        '..yyyyyyyyyyy...',
-        '...yyyyyyyyy....',
-        '....yyyyyyy.....',
-        '....yyyyyyy.....',
-        '...yyyy.yyyy....',
-        '...yyy...yyy....',
-        '..yyy.....yyy...',
-        '..yy.......yy...',
+        '................',
+        '.....Wx...xW....',
+        '....Wxx...xxW...',
+        '...Wxxx...xxxW..',
+        '..Wxxxx...xxxxW.',
+        '.Wxxxxx...xxxxxW',
+        'WxxxxxW.WxxxxxxW',
+        'xxxxxxW.Wxxxxxx.',
+        '.xxxxW...Wxxxx..',
+        '..xxW.....Wxx...',
+        '...W.......W....',
     ])
 
 
@@ -960,8 +994,8 @@ def make_icons():
         'poi-fuel': (ic_fuel(), None),
         'poi-shop': (ic_shop(), None),
         'poi-parking': (ic_parking(), None),
-        'poi-hospital': (ic_cross('r'), None),
-        'poi-pharmacy': (ic_cross('L'), None),
+        'poi-hospital': (ic_half_heart(), None),
+        'poi-pharmacy': (ic_heart(), None),
         'poi-hotel': (ic_hotel(), None),
         'poi-school': (ic_school(), None),
         'poi-bank': (ic_bank(), None),
