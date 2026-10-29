@@ -9,6 +9,8 @@ export const DEFAULT_SETTINGS = {
   blockSize: 'medium',    // small | medium | large
   voice: true,            // guidage vocal activé
   volume: 1,              // volume de la voix, de 0 à 1
+  houses: 'on',           // maisons de village en 3D : on | off
+  houseStyle: 'auto',     // auto | plains | taiga | snowy | savanna | desert
   lastView: null,         // { center: [lng, lat], zoom }
 };
 

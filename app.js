@@ -15,6 +15,7 @@ import { Position, gpsErrorMessage } from './js/position.js';
 import { SearchBox, photonReverse } from './js/search.js';
 import { Router } from './js/routing.js';
 import { Navigation } from './js/navigation.js';
+import { HouseLayer } from './js/houses.js';
 import { initSettings } from './js/settings.js';
 
 const C = self.CONFIG;
@@ -32,6 +33,11 @@ window.addEventListener('beforeinstallprompt', (e) => {
   installPrompt.event = e;
   installPrompt.onChange?.();
 });
+
+/** Style du village. « auto » = plaine pour l'instant (la détection du biome viendra ensuite). */
+function houseStyle(settings) {
+  return settings.houseStyle && settings.houseStyle !== 'auto' ? settings.houseStyle : 'plains';
+}
 
 function fatal(message) {
   $('#splash').hidden = false;
@@ -80,8 +86,8 @@ async function main() {
       fadeDuration: 0,
       attributionControl: false,
       maxZoom: 19,
-      maxPitch: 0,          // vue de dessus (la vue inclinée arrive à l'étape 3)
-      touchPitch: false,
+      maxPitch: 60,         // vue inclinée (deux doigts) pour voir les maisons
+      touchPitch: true,
       refreshExpiredTiles: false,
       cancelPendingTileRequestsWhileZooming: true,
     });
@@ -97,6 +103,13 @@ async function main() {
   };
   map.on('styleimagemissing', (e) => addImage(e.id));
   map.on('style.load', () => images.forEach((_, id) => addImage(id)));
+
+  // ---- Maisons de village en 3D ----
+  let houses = null;
+  if (settings.houses !== 'off') {
+    houses = new HouseLayer({ pack, style: houseStyle(settings) });
+    map.on('load', () => map.addLayer(houses, 'water-name'));
+  }
 
   map.once('load', hideSplash);
   setTimeout(hideSplash, 8000);
@@ -143,12 +156,14 @@ async function main() {
   // ---- Boussole : visible quand la carte est tournée ----
   const compassBtn = $('#btn-compass');
   const compassImg = $('#compass-img');
-  map.on('rotate', () => {
+  const updateCompass = () => {
     const b = map.getBearing();
-    compassBtn.hidden = Math.abs(b) < 0.5;
+    compassBtn.hidden = Math.abs(b) < 0.5 && map.getPitch() < 1;
     compassImg.style.transform = `rotate(${-b}deg)`;
-  });
-  compassBtn.addEventListener('click', () => map.easeTo({ bearing: 0, duration: 400 }));
+  };
+  map.on('rotate', updateCompass);
+  map.on('pitch', updateCompass);
+  compassBtn.addEventListener('click', () => map.easeTo({ bearing: 0, pitch: 0, duration: 400 }));
 
   // ---- Recherche + itinéraire ----
   const search = new SearchBox({
@@ -215,7 +230,7 @@ async function main() {
   } catch { /* pas grave */ }
 
   // Accès pratique pour le débogage depuis la console.
-  window.blocnav = { map, router, position, search, settings, navigation };
+  window.blocnav = { map, router, position, search, settings, navigation, houses };
 }
 
 /** Détecte un appui long (doigt immobile 0,6 s) sur la carte. */

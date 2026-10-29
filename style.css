@@ -252,6 +252,7 @@ img.px, .px { image-rendering: pixelated; image-rendering: crisp-edges; }
 .field-label { margin: 10px 0 6px; font-size: 15px; }
 .choice { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .choice .mc-btn { padding: 4px; font-size: 15px; }
+.choice.two { grid-template-columns: repeat(2, 1fr); }
 .pack-row { display: flex; align-items: center; gap: 10px; }
 .pack-icon { width: 48px; height: 48px; flex: none; background: #8b8b8b; border: 2px solid #000; }
 .hint { font-size: 13px; color: var(--ink-soft); margin: 8px 0 0; }

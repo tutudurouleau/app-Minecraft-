@@ -51,6 +51,19 @@ Les prochaines mises à jour envoyées sur cette branche seront en ligne automat
 - **Boutons à droite** : 🎯 ma position, ⚙️ réglages. La boussole apparaît si tu tournes la carte.
 - Le bouton **retour** d'Android ferme le panneau ouvert.
 
+## 🏘️ Village en 3D
+
+Les bâtiments proches (300 m autour) deviennent des maisons de village en blocs :
+soubassement en pierre, poteaux en rondins, porte, fenêtres, toit en escalier.
+Les grands bâtiments deviennent des immeubles.
+
+- **Incline la carte** en glissant **deux doigts** vers le haut. La boussole remet la carte à plat.
+- Pendant le guidage, la vue s'incline toute seule (façon Waze).
+- **⚙️ Réglages → Village 3D** : maisons oui/non, et style du village :
+  Plaine, Taïga, Neige, Savane ou Désert (« Auto » = Plaine pour l'instant).
+- Avec un pack importé, les murs et toits prennent les vraies textures du jeu
+  (planches, rondins, pierre, grès, vitres, portes…).
+
 ## 🎨 Mettre tes textures Minecraft
 
 Dans **⚙️ Réglages → Importer un pack (.zip / .jar)**, choisis :

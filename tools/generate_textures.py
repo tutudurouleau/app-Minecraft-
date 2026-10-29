@@ -288,13 +288,13 @@ def tex_mud():
     return img
 
 
-def tex_planks():
-    """Planches de bois (toits des petites maisons)."""
-    rng = random.Random(141)
+def tex_planks(seed=141, colors=('#A27A4B', '#9A7246', '#AA8352', '#96703F'), seam_color='#6B4E2C'):
+    """Planches de bois (chêne par défaut ; aussi sapin et acacia)."""
+    rng = random.Random(seed)
     img = new()
     px = img.load()
-    bases = [rgba(c) for c in ('#A27A4B', '#9A7246', '#AA8352', '#96703F')]
-    seam = rgba('#6B4E2C')
+    bases = [rgba(c) for c in colors]
+    seam = rgba(seam_color)
     seams_x = [7, 3, 11, 15]
     for row in range(4):
         base = bases[row]
@@ -348,6 +348,100 @@ def tex_rail():
     return img
 
 
+# --- Blocs des maisons de village (étape 3) ---------------------------------
+
+def tex_log(seed, colors, dark):
+    """Écorce de rondin vue de côté (rayures verticales)."""
+    rng = random.Random(seed)
+    img = new()
+    px = img.load()
+    cols = [rgba(c) for c in colors]
+    stripe = [rng.choice(cols) for _ in range(16)]
+    for x in range(16):
+        for y in range(16):
+            px[x, y] = shade(stripe[x], rng.choice((0.94, 1.0, 1.0, 1.06)))
+    for _ in range(6):  # crevasses sombres
+        x, y = rng.randrange(16), rng.randrange(16)
+        for dy in range(rng.randint(3, 7)):
+            px[x, (y + dy) % 16] = rgba(dark)
+    return img
+
+
+def tex_glass():
+    """Vitre : verre bleu clair, cadre blanc, reflets."""
+    img = new()
+    px = img.load()
+    for y in range(16):
+        for x in range(16):
+            px[x, y] = rgba('#A9DBF2') if (x + y) % 7 else rgba('#BFE6F7')
+    for i in range(16):
+        px[i, 0] = px[i, 15] = px[0, i] = px[15, i] = rgba('#EAF7FD')
+    for t in range(3, 8):  # reflets en diagonale
+        px[t, 11 - t] = rgba('#F4FBFE')
+        px[t + 4, 15 - t] = rgba('#DDF2FB')
+    return img
+
+
+def tex_door(top):
+    """Porte en bois (moitié haute avec deux petites fenêtres, ou basse)."""
+    rng = random.Random(161 if top else 162)
+    img = new()
+    px = img.load()
+    for y in range(16):
+        for x in range(16):
+            base = rgba('#9A7246') if (x // 4) % 2 else rgba('#A27A4B')
+            px[x, y] = shade(base, rng.choice((0.93, 1.0, 1.05)))
+    for i in range(16):
+        px[0, i] = px[15, i] = rgba('#5C4122')
+        px[i, 0 if top else 15] = rgba('#5C4122')
+    if top:
+        for (x0, y0) in ((3, 3), (9, 3)):
+            for y in range(y0, y0 + 5):
+                for x in range(x0, x0 + 4):
+                    px[x, y] = rgba('#A9DBF2')
+    else:
+        px[12, 3] = px[12, 4] = rgba('#3A3A3A')  # poignée
+    return img
+
+
+def tex_sandstone():
+    rng = random.Random(171)
+    img = new()
+    noise_fill(img, rng, ['#D9CA8E', '#DECF95', '#D3C286'], [3, 2, 2])
+    px = img.load()
+    for x in range(16):
+        px[x, 0] = rgba('#E8DDA8')
+        px[x, 1] = rgba('#E3D6A0')
+        px[x, 15] = rgba('#BFAE72')
+        if rng.random() < 0.7:
+            px[x, 8] = rgba('#C9B97F')
+    return img
+
+
+def tex_terracotta():
+    rng = random.Random(181)
+    img = new()
+    noise_fill(img, rng, ['#9E5B40', '#985539', '#A6624A', '#93523A'], [3, 3, 2, 1])
+    return img
+
+
+def tex_tower():
+    """Façade d'immeuble : cadre de pierre et grande fenêtre."""
+    rng = random.Random(191)
+    img = new()
+    noise_fill(img, rng, ['#8E8E8E', '#878787', '#959595'])
+    px = img.load()
+    for y in range(3, 13):
+        for x in range(3, 13):
+            px[x, y] = rgba('#2E4A6B')
+    for t in range(4, 10):
+        px[t, 13 - t] = rgba('#7FA7CF')
+        px[t + 1, 13 - t] = rgba('#5C84AE')
+    for i in range(3, 13):
+        px[i, 2] = px[i, 13] = px[2, i] = px[13, i] = rgba('#5E5E5E')
+    return img
+
+
 TEXTURES = {
     'grass': tex_grass,
     'flowers': tex_flowers,
@@ -366,6 +460,18 @@ TEXTURES = {
     'planks': tex_planks,
     'bricks': tex_bricks,
     'rail': tex_rail,
+    # maisons de village
+    'spruce_planks': lambda: tex_planks(142, ('#6B4A2C', '#634427', '#73502F', '#5E4125'), '#3E2A17'),
+    'acacia_planks': lambda: tex_planks(143, ('#B8613A', '#AD5A34', '#C26A40', '#A85532'), '#7A3A20'),
+    'oak_log': lambda: tex_log(151, ('#6B5132', '#5E4629', '#755A38'), '#3F2E1A'),
+    'spruce_log': lambda: tex_log(152, ('#3E2B1A', '#35251A', '#47321F'), '#24180E'),
+    'acacia_log': lambda: tex_log(153, ('#6B655C', '#5E5850', '#77716A'), '#45403A'),
+    'glass': tex_glass,
+    'door_top': lambda: tex_door(True),
+    'door_bottom': lambda: tex_door(False),
+    'sandstone': tex_sandstone,
+    'terracotta': tex_terracotta,
+    'tower': tex_tower,
 }
 
 

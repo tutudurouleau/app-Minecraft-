@@ -35,6 +35,23 @@ export const TEXTURES = [
   { id: 'rail', file: 'rail.png', transparent: true, pack: ['block/rail.png', 'blocks/rail_normal.png'], packRotate: true },
 ];
 
+/* Blocs des maisons de village en 3D (en plus de cobble, planks, bricks,
+   snow, stone et gravel de la liste ci-dessus). under : couleur sous les
+   parties transparentes de l'image du pack (vitres, portes). */
+export const HOUSE_TEXTURES = [
+  { id: 'spruce_planks', file: 'spruce_planks.png', pack: ['block/spruce_planks.png', 'blocks/planks_spruce.png'] },
+  { id: 'acacia_planks', file: 'acacia_planks.png', pack: ['block/acacia_planks.png', 'blocks/planks_acacia.png'] },
+  { id: 'oak_log', file: 'oak_log.png', pack: ['block/oak_log.png', 'blocks/log_oak.png'] },
+  { id: 'spruce_log', file: 'spruce_log.png', pack: ['block/spruce_log.png', 'blocks/log_spruce.png'] },
+  { id: 'acacia_log', file: 'acacia_log.png', pack: ['block/acacia_log.png', 'blocks/log_acacia.png'] },
+  { id: 'glass', file: 'glass.png', pack: ['block/glass.png', 'blocks/glass.png'], under: '#9ED3F0' },
+  { id: 'door_top', file: 'door_top.png', pack: ['block/oak_door_top.png', 'blocks/door_wood_upper.png'], under: '#3A2C1C' },
+  { id: 'door_bottom', file: 'door_bottom.png', pack: ['block/oak_door_bottom.png', 'blocks/door_wood_lower.png'], under: '#3A2C1C' },
+  { id: 'sandstone', file: 'sandstone.png', pack: ['block/cut_sandstone.png', 'block/sandstone.png', 'blocks/sandstone_smooth.png', 'blocks/sandstone_normal.png'] },
+  { id: 'terracotta', file: 'terracotta.png', pack: ['block/terracotta.png', 'blocks/hardened_clay.png'] },
+  { id: 'tower', file: 'tower.png' }, // façade d'immeuble : pas d'équivalent dans le jeu
+];
+
 /* Icônes de lieux : nom de l'icône -> types OpenStreetMap correspondants.
    Sert à la fois pour la carte et pour les résultats de recherche. */
 export const POI_GROUPS = {

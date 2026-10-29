@@ -58,6 +58,15 @@ export function buildStyle(C) {
 
   return {
     version: 8,
+    // Ciel bleu façon jeu, visible quand la carte est inclinée
+    sky: {
+      'sky-color': '#78A7FF',
+      'horizon-color': '#C3DAFF',
+      'fog-color': '#C3DAFF',
+      'sky-horizon-blend': 0.6,
+      'horizon-fog-blend': 0.5,
+      'fog-ground-blend': 0.85,
+    },
     name: 'BlocNav',
     glyphs: C.GLYPHS_URL,
     sources: {

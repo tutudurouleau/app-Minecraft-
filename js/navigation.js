@@ -125,7 +125,12 @@ export class Navigation {
   }
 
   recenter(pos) {
-    this.map.easeTo({ center: pos.lngLat, bearing: this.lastHeading, zoom: this.navZoom(), duration: 500 });
+    this.map.easeTo({ center: pos.lngLat, bearing: this.lastHeading, zoom: this.navZoom(), pitch: this.navPitch(), duration: 500 });
+  }
+
+  /** Vue inclinée façon Waze quand les maisons 3D sont activées. */
+  navPitch() {
+    return this.settings.houses !== 'off' ? 50 : 0;
   }
 
   navZoom() {
@@ -179,7 +184,7 @@ export class Navigation {
       const heading = (pos.heading != null && !Number.isNaN(pos.heading) && (pos.speed ?? 0) > 0.8)
         ? pos.heading : this.lastHeading;
       this.lastHeading = heading;
-      this.map.easeTo({ center: pos.lngLat, bearing: heading, zoom: this.navZoom(), duration: 700 });
+      this.map.easeTo({ center: pos.lngLat, bearing: heading, zoom: this.navZoom(), pitch: this.navPitch(), duration: 700 });
     }
 
     // Arrivée : distance réelle au point final (et non la progression projetée,

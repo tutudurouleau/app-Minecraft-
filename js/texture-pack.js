@@ -6,7 +6,7 @@
 
 import { loadScript } from './util.js';
 import { idbGet, idbSet, idbDel } from './storage.js';
-import { TEXTURES, ICON_SOURCES, iconLayers } from './textures.js';
+import { TEXTURES, HOUSE_TEXTURES, ICON_SOURCES, iconLayers } from './textures.js';
 
 const TEXTURE_ROOT = 'assets/minecraft/textures/';
 
@@ -39,7 +39,7 @@ export async function importPack(file) {
   if (!index.size) throw new Error('Aucune texture de blocs trouvée dans ce fichier.');
 
   const textures = {};
-  for (const def of TEXTURES) {
+  for (const def of [...TEXTURES, ...HOUSE_TEXTURES]) {
     for (const candidate of def.pack || []) {
       const entry = index.get(candidate);
       if (entry) {
@@ -70,5 +70,5 @@ export async function importPack(file) {
 
   const icon = packIcon ? new Blob([await packIcon.async('uint8array')], { type: 'image/png' }) : null;
   await idbSet('pack', { name: file.name, date: Date.now(), textures, icons, icon });
-  return { found, total: TEXTURES.filter((d) => d.pack).length, iconsFound, iconsTotal: Object.keys(ICON_SOURCES).length };
+  return { found, total: [...TEXTURES, ...HOUSE_TEXTURES].filter((d) => d.pack).length, iconsFound, iconsTotal: Object.keys(ICON_SOURCES).length };
 }
