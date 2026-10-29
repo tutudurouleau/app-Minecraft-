@@ -124,6 +124,7 @@ export class Router {
     this.panel.hidden = true;
     document.body.classList.remove('has-sheet');
     this.stepsList.hidden = true;
+    $('#btn-start-nav').hidden = true;
     this.map.getSource('route')?.setData(EMPTY);
     this.map.getSource('markers')?.setData(EMPTY);
     this.search.clearText();
@@ -136,6 +137,7 @@ export class Router {
     this.route = null;
     this.stepsBtn.hidden = true;
     this.stepsList.hidden = true;
+    $('#btn-start-nav').hidden = true;
     this.map.getSource('route')?.setData(EMPTY);
     this.drawMarkers(null);
     this.summary.replaceChildren(el('span', { class: 'loading', text: 'Calcul de l\'itinéraire' }));
@@ -164,6 +166,7 @@ export class Router {
       this.renderSummary(route);
       this.renderSteps(route);
       this.fitTo(route.geometry.coordinates);
+      $('#btn-start-nav').hidden = false;
     } catch (e) {
       if (e.kind === 'abort' || ctrl.signal.aborted) return;
       this.showError(routeErrorMessage(e));
@@ -172,6 +175,7 @@ export class Router {
   }
 
   showError(msg) {
+    $('#btn-start-nav').hidden = true;
     this.summary.replaceChildren(
       el('span', { class: 'err', text: msg }),
       el('button', { class: 'link-btn', text: 'Réessayer', onclick: () => this.compute() }),

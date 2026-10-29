@@ -78,6 +78,9 @@
 
     <div id="route-summary" class="summary"></div>
 
+    <button id="btn-start-nav" class="mc-btn wide green" hidden>
+      <img src="textures/icons/compass.png" alt="" class="px"><span>Démarrer la navigation</span>
+    </button>
     <button id="btn-steps" class="mc-btn wide" hidden>
       <img src="textures/icons/list.png" alt="" class="px"><span id="btn-steps-label">Voir les étapes</span>
     </button>
@@ -123,6 +126,13 @@
           <button class="mc-btn" data-value="large">Grands</button>
         </div>
 
+        <h3>Guidage vocal</h3>
+        <button id="btn-voice-toggle" class="mc-btn wide"></button>
+        <div id="voice-volume-wrap">
+          <div class="field-label">Volume</div>
+          <input id="voice-volume" type="range" min="0" max="100" step="10" class="mc-range">
+        </div>
+
         <h3>Hors-ligne</h3>
         <p id="cache-info" class="sub">Calcul…</p>
         <button id="btn-cache-clear" class="mc-btn wide">Vider le cache de la carte</button>
@@ -135,10 +145,34 @@
           Carte : © OpenStreetMap contributors, tuiles OpenFreeMap / OpenMapTiles.<br>
           Recherche : Photon (komoot). Itinéraires : OSRM, serveurs FOSSGIS.<br>
           Moteur de carte : MapLibre GL JS. Police : Tiny5.<br>
+          Guidage vocal : synthèse vocale du navigateur.<br>
           Les durées sont théoriques (pas de trafic en direct).
         </p>
       </div>
     </div>
+  </div>
+
+  <!-- Bandeau de guidage en direct (étape 2) -->
+  <div id="nav-bar" class="nav-bar" hidden>
+    <div class="nav-icon-wrap"><img id="nav-icon" src="textures/icons/turn-straight.png" alt="" class="px"></div>
+    <div class="nav-texts">
+      <div id="nav-dist" class="nav-dist"></div>
+      <div id="nav-text" class="nav-text"></div>
+    </div>
+  </div>
+  <button id="nav-recenter" class="mc-btn square nav-recenter" hidden aria-label="Recentrer la carte">
+    <img src="textures/icons/locate.png" alt="" class="px">
+  </button>
+  <div id="nav-bottom" class="nav-bottom panel" hidden>
+    <div class="nav-stats-row">
+      <div class="nav-stat"><span id="nav-speed">--</span><small>vitesse</small></div>
+      <div class="nav-stat"><span id="nav-remaining">--</span><small>restant</small></div>
+      <div class="nav-stat"><span id="nav-eta">--</span><small>arrivée</small></div>
+      <button id="nav-exit" class="mc-btn square red" aria-label="Quitter la navigation">
+        <img src="textures/icons/close.png" alt="" class="px">
+      </button>
+    </div>
+    <div class="nav-credit">© OpenStreetMap contributors</div>
   </div>
 
   <!-- Message temporaire (style « barre d'action ») -->

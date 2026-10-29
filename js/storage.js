@@ -7,6 +7,8 @@ export const DEFAULT_SETTINGS = {
   mode: 'car',            // car | bike | foot
   pixelation: 'medium',   // strong | medium | off
   blockSize: 'medium',    // small | medium | large
+  voice: true,            // guidage vocal activé
+  volume: 1,              // volume de la voix, de 0 à 1
   lastView: null,         // { center: [lng, lat], zoom }
 };
 

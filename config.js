@@ -10,7 +10,7 @@
  */
 self.CONFIG = {
   APP_NAME: 'BlocNav',
-  VERSION: '1.0.0 (étape 1)',
+  VERSION: '1.1.0 (étape 2)',
 
   // --- Carte : tuiles vectorielles OpenStreetMap (OpenFreeMap) ---
   TILES_URL: 'https://tiles.openfreemap.org/planet',

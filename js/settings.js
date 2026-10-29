@@ -2,6 +2,7 @@
 
 import { $, toast, pushLayer, popLayer } from './util.js';
 import { importPack, removePack } from './texture-pack.js';
+import { Voice } from './voice.js';
 
 const C = self.CONFIG;
 const TILE_CACHE = 'blocnav-tiles';
@@ -74,6 +75,29 @@ export function initSettings({ settings, saveSettings, pack, packStats, installP
       });
     }
   }
+
+  // ---- Guidage vocal ----
+  const voiceBtn = $('#btn-voice-toggle');
+  const volumeWrap = $('#voice-volume-wrap');
+  const volumeInput = $('#voice-volume');
+  const voice = new Voice(settings);
+  function refreshVoiceUI() {
+    voiceBtn.textContent = settings.voice !== false ? 'Voix : activée 🔊' : 'Voix : désactivée 🔇';
+    volumeWrap.hidden = settings.voice === false;
+    volumeInput.value = Math.round((settings.volume ?? 1) * 100);
+  }
+  voiceBtn.addEventListener('click', () => {
+    settings.voice = settings.voice === false; // bascule activé/désactivé
+    saveSettings();
+    refreshVoiceUI();
+    if (settings.voice !== false) voice.speak('Guidage vocal activé.', { interrupt: true });
+  });
+  volumeInput.addEventListener('input', () => {
+    settings.volume = Number(volumeInput.value) / 100;
+    saveSettings();
+  });
+  volumeInput.addEventListener('change', () => voice.speak('Volume réglé.', { interrupt: true }));
+  refreshVoiceUI();
 
   // ---- Cache hors-ligne ----
   async function refreshCacheInfo() {

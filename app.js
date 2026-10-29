@@ -14,6 +14,7 @@ import { loadPack } from './js/texture-pack.js';
 import { Position, gpsErrorMessage } from './js/position.js';
 import { SearchBox, photonReverse } from './js/search.js';
 import { Router } from './js/routing.js';
+import { Navigation } from './js/navigation.js';
 import { initSettings } from './js/settings.js';
 
 const C = self.CONFIG;
@@ -158,6 +159,10 @@ async function main() {
   const router = new Router(map, { position, settings, saveSettings: save, search });
   map.on('click', () => search.close());
 
+  // ---- Guidage en direct (étape 2) ----
+  const navigation = new Navigation(map, { position, router, settings });
+  $('#btn-start-nav').addEventListener('click', () => navigation.start());
+
   // Appui long sur la carte : choisir ce point (destination ou départ).
   let lastPick = 0;
   async function pickPoint(lngLat) {
@@ -201,12 +206,14 @@ async function main() {
   try {
     if (!localStorage.getItem('blocnav.hint')) {
       localStorage.setItem('blocnav.hint', '1');
-      setTimeout(() => toast('Astuce : appui long sur la carte pour y aller.', 5000), 2500);
+      setTimeout(() => {
+        if (!document.body.classList.contains('navigating')) toast('Astuce : appui long sur la carte pour y aller.', 5000);
+      }, 2500);
     }
   } catch { /* pas grave */ }
 
   // Accès pratique pour le débogage depuis la console.
-  window.blocnav = { map, router, position, search, settings };
+  window.blocnav = { map, router, position, search, settings, navigation };
 }
 
 /** Détecte un appui long (doigt immobile 0,6 s) sur la carte. */

@@ -105,6 +105,10 @@ img.px, .px { image-rendering: pixelated; image-rendering: crisp-edges; }
   background: var(--green);
   box-shadow: inset 2px 2px 0 var(--green-light), inset -2px -3px 0 var(--green-dark);
 }
+.mc-btn.red {
+  background: var(--red);
+  box-shadow: inset 2px 2px 0 #ff6b63, inset -2px -3px 0 #8a1b14;
+}
 .mc-btn.selected { outline: 2px solid #fff; outline-offset: -5px; }
 .mc-btn:disabled { opacity: .6; }
 
@@ -252,6 +256,8 @@ img.px, .px { image-rendering: pixelated; image-rendering: crisp-edges; }
 .pack-icon { width: 48px; height: 48px; flex: none; background: #8b8b8b; border: 2px solid #000; }
 .hint { font-size: 13px; color: var(--ink-soft); margin: 8px 0 0; }
 .about { font-size: 14px; line-height: 1.45; margin: 4px 0 0; }
+.mc-range { width: 100%; height: 36px; accent-color: var(--green); }
+#voice-volume-wrap[hidden] { display: none; }
 
 /* ---------- Message temporaire ---------- */
 .toast {
@@ -279,6 +285,52 @@ body.has-sheet .osm-credit { display: none; }
 /* Quand le panneau du bas est ouvert, l'attribution s'affiche dedans. */
 .sheet-credit { margin-top: 8px; text-align: right; font-family: system-ui, sans-serif; font-size: 11px; color: #444; }
 
+/* ---------- Guidage en direct (étape 2) ---------- */
+.nav-bar {
+  position: fixed; z-index: 30;
+  top: calc(var(--safe-top) + 10px);
+  left: calc(var(--safe-left) + 10px);
+  right: calc(var(--safe-right) + 10px);
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px;
+  background: var(--field);
+  border: 2px solid #000;
+  box-shadow: inset 0 0 0 2px #a0a0a0;
+  color: #fff;
+}
+.nav-icon-wrap {
+  flex: none; width: 60px; height: 60px;
+  display: flex; align-items: center; justify-content: center;
+  background: #3a3a3a; border: 2px solid #000;
+}
+.nav-icon-wrap img { width: 44px; height: 44px; }
+.nav-texts { flex: 1; min-width: 0; }
+.nav-dist { font-size: 30px; font-weight: 700; line-height: 1.15; }
+.nav-text { font-size: 16px; color: #d8d8d8; overflow-wrap: anywhere; margin-top: 2px; }
+
+.nav-recenter {
+  position: fixed; z-index: 30;
+  top: calc(var(--safe-top) + 94px);
+  right: calc(var(--safe-right) + 10px);
+}
+
+.nav-bottom {
+  position: fixed; z-index: 30;
+  left: calc(var(--safe-left) + 8px);
+  right: calc(var(--safe-right) + 8px);
+  bottom: calc(var(--safe-bottom) + 8px);
+  padding: 10px 12px;
+}
+.nav-stats-row { display: flex; align-items: center; gap: 8px; }
+.nav-stat { flex: 1; text-align: center; }
+.nav-stat span { display: block; font-size: 19px; font-weight: 700; }
+.nav-stat small { font-size: 12px; color: var(--ink-soft); }
+.nav-credit { margin-top: 6px; text-align: right; font-family: system-ui, sans-serif; font-size: 10px; color: #444; }
+
+/* Pendant la navigation : on cache les panneaux normaux */
+body.navigating #top, body.navigating #fabs, body.navigating #route-panel { display: none; }
+body.navigating .osm-credit { display: none; }
+
 /* ---------- Marqueur de position ---------- */
 .player-marker { width: 34px; height: 34px; pointer-events: none; }
 .player-marker img { width: 100%; height: 100%; image-rendering: pixelated; display: block; }
@@ -293,4 +345,7 @@ body.has-sheet .osm-credit { display: none; }
   }
   .top { max-width: 380px; }
   .toast { left: calc(var(--safe-left) + 400px); top: calc(var(--safe-top) + 10px); }
+  .nav-bar { right: auto; width: 380px; }
+  .nav-recenter { top: calc(var(--safe-top) + 10px); }
+  .nav-bottom { right: auto; width: 380px; }
 }
