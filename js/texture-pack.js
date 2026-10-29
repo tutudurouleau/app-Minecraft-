@@ -6,7 +6,7 @@
 
 import { loadScript } from './util.js';
 import { idbGet, idbSet, idbDel } from './storage.js';
-import { TEXTURES } from './textures.js';
+import { TEXTURES, ICON_SOURCES } from './textures.js';
 
 const TEXTURE_ROOT = 'assets/minecraft/textures/';
 
@@ -14,8 +14,8 @@ export const loadPack = () => idbGet('pack');
 export const removePack = () => idbDel('pack');
 
 /**
- * Lit le fichier choisi et enregistre les textures trouvées.
- * @returns {Promise<{found: number, total: number}>}
+ * Lit le fichier choisi et enregistre les textures et icônes trouvées.
+ * @returns {Promise<{found: number, total: number, iconsFound: number, iconsTotal: number}>}
  */
 export async function importPack(file) {
   await loadScript('lib/jszip.min.js');
@@ -52,7 +52,22 @@ export async function importPack(file) {
   const found = Object.keys(textures).length;
   if (!found) throw new Error('Aucune des textures utiles (herbe, terre, eau…) n\'a été trouvée.');
 
+  // Icônes « objets du jeu » (boussole, émeraude, cœurs…) : facultatives,
+  // on garde notre dessin si l'image n'est pas dans le pack.
+  const icons = {};
+  for (const [name, source] of Object.entries(ICON_SOURCES)) {
+    for (const candidate of source.pack || []) {
+      const entry = index.get(candidate);
+      if (entry) {
+        const data = await entry.async('uint8array');
+        icons[name] = new Blob([data], { type: 'image/png' });
+        break;
+      }
+    }
+  }
+  const iconsFound = Object.keys(icons).length;
+
   const icon = packIcon ? new Blob([await packIcon.async('uint8array')], { type: 'image/png' }) : null;
-  await idbSet('pack', { name: file.name, date: Date.now(), textures, icon });
-  return { found, total: TEXTURES.filter((d) => d.pack).length };
+  await idbSet('pack', { name: file.name, date: Date.now(), textures, icons, icon });
+  return { found, total: TEXTURES.filter((d) => d.pack).length, iconsFound, iconsTotal: Object.keys(ICON_SOURCES).length };
 }

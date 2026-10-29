@@ -32,7 +32,7 @@ export function initSettings({ settings, saveSettings, pack, packStats, installP
   // ---- Pack de textures ----
   if (pack) {
     $('#pack-name').textContent = pack.name;
-    $('#pack-info').textContent = `${packStats.fromPack} textures du pack utilisées`;
+    $('#pack-info').textContent = `${packStats.fromPack} textures et ${packStats.fromPackIcons} icônes du pack utilisées`;
     $('#btn-pack-reset').hidden = false;
     if (pack.icon) $('#pack-icon').src = URL.createObjectURL(pack.icon);
   }
@@ -46,9 +46,9 @@ export function initSettings({ settings, saveSettings, pack, packStats, installP
     btn.disabled = true;
     btn.textContent = 'Lecture du pack…';
     try {
-      const { found, total } = await importPack(file);
-      toast(`Pack importé : ${found}/${total} textures trouvées. Rechargement…`);
-      setTimeout(() => location.reload(), 1500);
+      const { found, total, iconsFound, iconsTotal } = await importPack(file);
+      toast(`Pack importé : ${found}/${total} textures et ${iconsFound}/${iconsTotal} icônes trouvées. Rechargement…`);
+      setTimeout(() => location.reload(), 1800);
     } catch (e) {
       toast(e.message || 'Import impossible.', 6000);
       btn.disabled = false;

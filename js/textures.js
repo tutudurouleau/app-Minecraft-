@@ -69,7 +69,47 @@ const MAP_ICONS = {
   ...Object.fromEntries([...Object.keys(POI_GROUPS), 'poi-generic'].map((n) => [n, 22])),
 };
 
+/* ------------------------------------------------------------------
+ * Icônes « objets du jeu » : si le pack importé contient l'image de
+ * l'objet, elle remplace notre dessin. Chemins compatibles avec les
+ * versions récentes (textures/item/…) et un peu plus anciennes
+ * (textures/items/…).
+ *   tint : applique une couleur par-dessus l'image du pack (sert pour
+ *          la potion, dont la couleur est calculée par le jeu et non
+ *          fixée dans une image).
+ * ------------------------------------------------------------------ */
+export const ICON_SOURCES = {
+  search: { pack: ['item/spyglass.png'] },
+  compass: { pack: ['item/compass_00.png', 'item/compass_16.png', 'item/compass.png', 'items/compass.png'] },
+  'poi-food': { pack: ['item/chicken.png', 'items/chicken_raw.png'] },
+  'poi-cafe': { pack: ['item/potion_overlay.png', 'items/potion_overlay.png'], tint: '#D91FA8' },
+  'poi-fuel': { pack: ['item/lava_bucket.png', 'items/bucket_lava.png'] },
+  'poi-shop': { pack: ['item/emerald.png', 'items/emerald.png'] },
+  'poi-parking': { pack: ['item/oak_sign.png', 'item/sign.png'] },
+  'poi-hospital': { pack: ['gui/sprites/hud/heart/half.png'] },
+  'poi-pharmacy': { pack: ['gui/sprites/hud/heart/full.png'] },
+  'poi-school': { pack: ['item/paper.png', 'items/paper.png'] },
+  'poi-bank': { pack: ['item/diamond.png', 'items/diamond.png'] },
+  'poi-bus': { pack: ['item/minecart.png', 'items/minecart_normal.png'] },
+  'poi-train': { pack: ['item/rail.png', 'items/rail_normal.png'] },
+  'poi-star': { pack: ['item/elytra.png', 'items/elytra.png'] },
+};
+
 export const iconURL = (name) => `textures/icons/${name}.png`;
+
+/**
+ * Applique l'icône du pack (si elle existe) à une balise <img> de
+ * l'interface (hors carte, ex. la loupe ou la boussole). Revient au
+ * dessin original si l'image du pack ne peut pas s'afficher.
+ * @returns {boolean} vrai si l'icône du pack a été utilisée
+ */
+export function setInterfaceIcon(el, name, pack) {
+  const blob = pack?.icons?.[name];
+  if (!el || !blob) return false;
+  el.onerror = () => { el.onerror = null; el.src = iconURL(name); };
+  el.src = URL.createObjectURL(blob);
+  return true;
+}
 
 /* ---------------------------------------------------------------- */
 
@@ -98,6 +138,37 @@ function upscale(source, size, factor) {
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(source, 0, 0, out.width, out.height);
   return ctx.getImageData(0, 0, out.width, out.height);
+}
+
+/** Réduit une image de pack trop grande (packs « HD ») avant de l'agrandir proprement. */
+function clampSize(bmp, max) {
+  const big = Math.max(bmp.width, bmp.height);
+  if (big <= max) return bmp;
+  const w = Math.round((bmp.width * max) / big);
+  const h = Math.round((bmp.height * max) / big);
+  const c = canvas(w, h);
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(bmp, 0, 0, w, h);
+  return c;
+}
+
+/** Teinte une icône en gardant sa transparence (contrairement aux textures de sol). */
+function tintIcon(source, hex) {
+  const t = hexToRgb(hex);
+  const c = canvas(source.width, source.height);
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(source, 0, 0);
+  const img = ctx.getImageData(0, 0, c.width, c.height);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    d[i] = (d[i] * t[0]) / 255;
+    d[i + 1] = (d[i + 1] * t[1]) / 255;
+    d[i + 2] = (d[i + 2] * t[2]) / 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  return c;
 }
 
 /**
@@ -155,12 +226,13 @@ function fallbackTexture() {
 
 /**
  * Prépare toutes les images de la carte (textures + icônes).
- * @returns {Promise<{images: Map, fromPack: number}>}
+ * @returns {Promise<{images: Map, fromPack: number, fromPackIcons: number}>}
  *   images : id -> { data: ImageData, pixelRatio }
  */
 export async function buildMapImages({ blockCss, pixelRatio, pack }) {
   const images = new Map();
   let fromPack = 0;
+  let fromPackIcons = 0;
 
   await Promise.all(TEXTURES.map(async (def) => {
     let bmp = null;
@@ -180,15 +252,25 @@ export async function buildMapImages({ blockCss, pixelRatio, pack }) {
   }));
 
   await Promise.all(Object.entries(MAP_ICONS).map(async ([name, cssSize]) => {
+    const source = ICON_SOURCES[name];
+    let bmp = null;
+    const blob = pack?.icons?.[name];
+    if (source && blob) {
+      try {
+        bmp = clampSize(await decode(blob), 48);
+        if (source.tint) bmp = tintIcon(bmp, source.tint);
+        fromPackIcons++;
+      } catch { bmp = null; /* image du pack illisible : on garde notre dessin */ }
+    }
     try {
-      const bmp = await decode(iconURL(name));
-      // Icône dessinée pixel pour pixel : nette quand la carte ne bouge pas.
-      const factor = Math.max(1, Math.round((cssSize * pixelRatio) / bmp.width));
+      if (!bmp) bmp = await decode(iconURL(name));
+      // Icône dessinée (ou du pack) pixel pour pixel : nette quand la carte ne bouge pas.
+      const factor = Math.max(1, Math.round((cssSize * pixelRatio) / Math.max(bmp.width, bmp.height)));
       images.set(`ico-${name}`, { data: upscale(bmp, bmp.width, factor), pixelRatio });
     } catch (e) {
       console.warn('Icône introuvable :', name, e);
     }
   }));
 
-  return { images, fromPack };
+  return { images, fromPack, fromPackIcons };
 }

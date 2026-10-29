@@ -8,7 +8,7 @@
 
 import { $, debounce, toast } from './js/util.js';
 import { loadSettings, saveSettings as persistSettings } from './js/storage.js';
-import { buildMapImages } from './js/textures.js';
+import { buildMapImages, setInterfaceIcon } from './js/textures.js';
 import { buildStyle } from './js/map-style.js';
 import { loadPack } from './js/texture-pack.js';
 import { Position, gpsErrorMessage } from './js/position.js';
@@ -59,11 +59,15 @@ async function main() {
 
   // ---- Textures (originales ou pack importé) ----
   const pack = await loadPack().catch(() => null);
-  const { images, fromPack } = await buildMapImages({
+  const { images, fromPack, fromPackIcons: fromPackMapIcons } = await buildMapImages({
     blockCss: BLOCK_SIZES[settings.blockSize] || BLOCK_SIZES.medium,
     pixelRatio,
     pack,
   });
+  // Icônes d'interface (hors carte) : loupe et boussole.
+  let fromPackIcons = fromPackMapIcons;
+  if (setInterfaceIcon($('#search-icon'), 'search', pack)) fromPackIcons++;
+  if (setInterfaceIcon($('#compass-img'), 'compass', pack)) fromPackIcons++;
 
   // ---- Carte ----
   const view = settings.lastView;
@@ -192,7 +196,7 @@ async function main() {
   setupLongPress(map, pickPoint);
 
   // ---- Réglages ----
-  initSettings({ settings, saveSettings: save, pack, packStats: { fromPack }, installPrompt });
+  initSettings({ settings, saveSettings: save, pack, packStats: { fromPack, fromPackIcons }, installPrompt });
 
   // ---- Mémorise la dernière vue ----
   map.on('moveend', debounce(() => {
