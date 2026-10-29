@@ -898,20 +898,19 @@ def ic_bus():
 
 
 def ic_train():
-    """Rail (comme l'objet du jeu), pour les gares."""
-    return from_ascii([
-        '................',
-        '..NN......NN....',
-        '..NN......NN....',
-        'gggggggggggggggg',
-        'GGGGGGGGGGGGGGGG',
-        '..NN......NN....',
-        '..NN......NN....',
-        'gggggggggggggggg',
-        'GGGGGGGGGGGGGGGG',
-        '..NN......NN....',
-        '..NN......NN....',
-    ])
+    """Rail de propulsion (rails dorés + redstone), pour les gares."""
+    p = Pix()
+    for y0 in (1, 5, 9, 13):            # traverses en bois
+        p.rect(2, y0, 13, y0, 'n')
+        p.rect(2, y0 + 1, 13, y0 + 1, 'N')
+    p.rect(3, 0, 3, 15, 'y')            # rails dorés
+    p.rect(4, 0, 4, 15, 'Y')
+    p.rect(11, 0, 11, 15, 'y')
+    p.rect(12, 0, 12, 15, 'Y')
+    p.rect(7, 0, 8, 15, 'R')            # poudre de redstone au milieu
+    for y in range(0, 16, 3):
+        p.rect(7, y, 8, y, 'r')
+    return p.img
 
 
 def ic_star():
@@ -932,9 +931,14 @@ def ic_star():
 
 
 def ic_generic():
+    """Perle de l'Ender (lieu sans catégorie précise)."""
     p = Pix()
-    p.ring(8, 8, 0, 4.2, 'v')
-    p.ring(8, 8, 0, 2.0, 'w')
+    p.ring(8, 8, 0, 5.6, '#0B4D42')     # bord sombre
+    p.ring(8, 8, 0, 4.4, '#1E7F6E')     # perle
+    p.ring(8, 8, 0, 2.4, '#0E3B33')     # cœur foncé
+    p.dot(5, 5, '#8FE8D2')              # reflet
+    p.dot(6, 5, '#4FBFA6')
+    p.dot(5, 6, '#4FBFA6')
     return p.img
 
 

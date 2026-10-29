@@ -3,6 +3,7 @@
 import { $, toast, pushLayer, popLayer } from './util.js';
 import { importPack, removePack } from './texture-pack.js';
 import { Voice } from './voice.js';
+import { ICON_SOURCES } from './textures.js';
 
 const C = self.CONFIG;
 const TILE_CACHE = 'blocnav-tiles';
@@ -32,7 +33,13 @@ export function initSettings({ settings, saveSettings, pack, packStats, installP
   // ---- Pack de textures ----
   if (pack) {
     $('#pack-name').textContent = pack.name;
-    $('#pack-info').textContent = `${packStats.fromPack} textures et ${packStats.fromPackIcons} icônes du pack utilisées`;
+    $('#pack-info').textContent = `${packStats.fromPack} textures et ${packStats.packIcons.length} icônes du pack utilisées`;
+    const missing = Object.entries(ICON_SOURCES)
+      .filter(([name]) => !packStats.packIcons.includes(name))
+      .map(([, s]) => s.label);
+    const missingEl = $('#pack-missing');
+    missingEl.hidden = !missing.length;
+    missingEl.textContent = `Pas trouvées dans ce pack (mes dessins restent) : ${missing.join(', ')}.`;
     $('#btn-pack-reset').hidden = false;
     if (pack.icon) $('#pack-icon').src = URL.createObjectURL(pack.icon);
   }

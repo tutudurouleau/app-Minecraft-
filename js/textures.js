@@ -71,45 +71,51 @@ const MAP_ICONS = {
 
 /* ------------------------------------------------------------------
  * Icônes « objets du jeu » : si le pack importé contient l'image de
- * l'objet, elle remplace notre dessin. Chemins compatibles avec les
- * versions récentes (textures/item/…) et un peu plus anciennes
- * (textures/items/…).
- *   tint : applique une couleur par-dessus l'image du pack (sert pour
- *          la potion, dont la couleur est calculée par le jeu et non
- *          fixée dans une image).
+ * l'objet, elle remplace notre dessin PARTOUT (carte, boutons,
+ * résultats de recherche). Chemins des versions récentes
+ * (textures/item/…, textures/block/…, textures/gui/…) puis anciennes
+ * (textures/items/…, textures/blocks/…).
+ *
+ * Une icône peut être faite de plusieurs images superposées (layers),
+ * dessinées dans l'ordre. tint : couleur appliquée à une image grise
+ * (ex. le liquide de la potion, coloré par le jeu lui-même).
  * ------------------------------------------------------------------ */
 export const ICON_SOURCES = {
-  search: { pack: ['item/spyglass.png'] },
-  compass: { pack: ['item/compass_00.png', 'item/compass_16.png', 'item/compass.png', 'items/compass.png'] },
-  'poi-food': { pack: ['item/chicken.png', 'items/chicken_raw.png'] },
-  'poi-cafe': { pack: ['item/potion_overlay.png', 'items/potion_overlay.png'], tint: '#D91FA8' },
-  'poi-fuel': { pack: ['item/lava_bucket.png', 'items/bucket_lava.png'] },
-  'poi-shop': { pack: ['item/emerald.png', 'items/emerald.png'] },
-  'poi-parking': { pack: ['item/oak_sign.png', 'item/sign.png'] },
-  'poi-hospital': { pack: ['gui/sprites/hud/heart/half.png'] },
-  'poi-pharmacy': { pack: ['gui/sprites/hud/heart/full.png'] },
-  'poi-school': { pack: ['item/paper.png', 'items/paper.png'] },
-  'poi-bank': { pack: ['item/diamond.png', 'items/diamond.png'] },
-  'poi-bus': { pack: ['item/minecart.png', 'items/minecart_normal.png'] },
-  'poi-train': { pack: ['item/rail.png', 'items/rail_normal.png'] },
-  'poi-star': { pack: ['item/elytra.png', 'items/elytra.png'] },
+  search: { label: 'longue-vue', pack: ['item/spyglass.png'] },
+  compass: { label: 'boussole', pack: ['item/compass_00.png', 'item/compass_16.png', 'item/compass.png', 'items/compass.png'] },
+  'poi-food': { label: 'barre de faim', pack: ['gui/sprites/hud/food_full.png', 'item/cooked_chicken.png', 'item/chicken.png', 'items/chicken_cooked.png'] },
+  'poi-cafe': {
+    label: 'potion',
+    layers: [
+      { pack: ['item/potion_overlay.png', 'items/potion_overlay.png'], tint: '#F82423' }, // liquide (potion de soin)
+      { pack: ['item/potion.png', 'items/potion_bottle_drinkable.png'] },                 // fiole en verre
+    ],
+  },
+  'poi-fuel': { label: 'seau de lave', pack: ['item/lava_bucket.png', 'items/bucket_lava.png'] },
+  'poi-shop': { label: 'émeraude', pack: ['item/emerald.png', 'items/emerald.png'] },
+  'poi-parking': { label: 'pancarte', pack: ['item/oak_sign.png', 'item/sign.png', 'items/sign.png'] },
+  'poi-hospital': { label: 'demi-cœur', pack: ['gui/sprites/hud/heart/half.png'] },
+  'poi-pharmacy': { label: 'cœur', pack: ['gui/sprites/hud/heart/full.png'] },
+  'poi-school': { label: 'papier', pack: ['item/paper.png', 'items/paper.png'] },
+  'poi-bank': { label: 'diamant', pack: ['item/diamond.png', 'items/diamond.png'] },
+  'poi-bus': { label: 'wagonnet', pack: ['item/minecart.png', 'items/minecart_normal.png'] },
+  // Les rails sont rangés avec les blocs dans le jeu.
+  'poi-train': { label: 'rail de propulsion', pack: ['block/powered_rail.png', 'block/powered_rail_on.png', 'blocks/rail_golden.png', 'blocks/rail_golden_powered.png'] },
+  'poi-star': { label: 'élytre', pack: ['item/elytra.png', 'items/elytra.png'] },
+  'poi-generic': { label: 'perle de l\'Ender', pack: ['item/ender_pearl.png', 'items/ender_pearl.png'] },
 };
 
-export const iconURL = (name) => `textures/icons/${name}.png`;
-
-/**
- * Applique l'icône du pack (si elle existe) à une balise <img> de
- * l'interface (hors carte, ex. la loupe ou la boussole). Revient au
- * dessin original si l'image du pack ne peut pas s'afficher.
- * @returns {boolean} vrai si l'icône du pack a été utilisée
- */
-export function setInterfaceIcon(el, name, pack) {
-  const blob = pack?.icons?.[name];
-  if (!el || !blob) return false;
-  el.onerror = () => { el.onerror = null; el.src = iconURL(name); };
-  el.src = URL.createObjectURL(blob);
-  return true;
+/** Liste des images (calques) d'une icône, dans l'ordre de dessin. */
+export function iconLayers(source) {
+  return source.layers || [{ pack: source.pack, tint: source.tint }];
 }
+
+// Icônes du pack prêtes à l'emploi : nom -> canvas, et nom -> URL affichable.
+const packIconCanvas = {};
+const packIconURL = {};
+
+/** Image d'une icône : celle du pack si elle existe, sinon notre dessin. */
+export const iconURL = (name) => packIconURL[name] || `textures/icons/${name}.png`;
 
 /* ---------------------------------------------------------------- */
 
@@ -133,7 +139,7 @@ async function decode(src) {
 
 /** Agrandit une petite image en gardant des pixels bien nets. */
 function upscale(source, size, factor) {
-  const out = canvas(size * factor, size * factor);
+  const out = canvas((source.width || size) * factor, (source.height || size) * factor);
   const ctx = out.getContext('2d', { willReadFrequently: true });
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(source, 0, 0, out.width, out.height);
@@ -169,6 +175,66 @@ function tintIcon(source, hex) {
   }
   ctx.putImageData(img, 0, 0);
   return c;
+}
+
+/** Garde seulement la 1re image d'une image animée (bande verticale de carrés). */
+function firstFrame(bmp) {
+  if (bmp.height <= bmp.width) return bmp;
+  const n = bmp.width;
+  const c = canvas(n, n);
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(bmp, 0, 0, n, n, 0, 0, n, n);
+  return c;
+}
+
+/**
+ * Assemble les icônes du pack (calques superposés, teinte, 1re image
+ * des animations) et prépare leurs URL pour toute l'interface.
+ * @returns {Promise<string[]>} noms des icônes venant du pack
+ */
+async function preparePackIcons(pack) {
+  const used = [];
+  for (const [name, source] of Object.entries(ICON_SOURCES)) {
+    const stored = pack?.icons?.[name];
+    if (!stored) continue;
+    const blobs = Array.isArray(stored) ? stored : [stored];
+    const layers = iconLayers(source);
+    if (blobs.length !== layers.length) continue; // ancien import incomplet : on garde le dessin
+    try {
+      let out = null;
+      for (let i = 0; i < layers.length; i++) {
+        let img = clampSize(firstFrame(await decode(blobs[i])), 48);
+        if (layers[i].tint) img = tintIcon(img, layers[i].tint);
+        if (!out) {
+          out = canvas(img.width, img.height);
+          out.getContext('2d').imageSmoothingEnabled = false;
+        }
+        const ctx = out.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(img, 0, 0, out.width, out.height);
+      }
+      const blob = await new Promise((resolve) => out.toBlob(resolve, 'image/png'));
+      packIconCanvas[name] = out;
+      packIconURL[name] = URL.createObjectURL(blob);
+      used.push(name);
+    } catch (e) {
+      console.warn('Icône du pack illisible :', name, e);
+    }
+  }
+  return used;
+}
+
+/** Remplace dans la page les icônes déjà affichées par celles du pack. */
+export function applyPackIconsToPage(root = document) {
+  for (const img of root.querySelectorAll('img[src*="textures/icons/"]')) {
+    const m = img.getAttribute('src').match(/textures\/icons\/([\w-]+)\.png$/);
+    const url = m && packIconURL[m[1]];
+    if (!url) continue;
+    const original = img.getAttribute('src');
+    img.onerror = () => { img.onerror = null; img.src = original; };
+    img.src = url;
+  }
 }
 
 /**
@@ -226,13 +292,14 @@ function fallbackTexture() {
 
 /**
  * Prépare toutes les images de la carte (textures + icônes).
- * @returns {Promise<{images: Map, fromPack: number, fromPackIcons: number}>}
+ * @returns {Promise<{images: Map, fromPack: number, packIcons: string[]}>}
  *   images : id -> { data: ImageData, pixelRatio }
+ *   packIcons : noms des icônes qui viennent du pack importé
  */
 export async function buildMapImages({ blockCss, pixelRatio, pack }) {
   const images = new Map();
   let fromPack = 0;
-  let fromPackIcons = 0;
+  const packIcons = await preparePackIcons(pack);
 
   await Promise.all(TEXTURES.map(async (def) => {
     let bmp = null;
@@ -252,18 +319,8 @@ export async function buildMapImages({ blockCss, pixelRatio, pack }) {
   }));
 
   await Promise.all(Object.entries(MAP_ICONS).map(async ([name, cssSize]) => {
-    const source = ICON_SOURCES[name];
-    let bmp = null;
-    const blob = pack?.icons?.[name];
-    if (source && blob) {
-      try {
-        bmp = clampSize(await decode(blob), 48);
-        if (source.tint) bmp = tintIcon(bmp, source.tint);
-        fromPackIcons++;
-      } catch { bmp = null; /* image du pack illisible : on garde notre dessin */ }
-    }
     try {
-      if (!bmp) bmp = await decode(iconURL(name));
+      const bmp = packIconCanvas[name] || await decode(iconURL(name));
       // Icône dessinée (ou du pack) pixel pour pixel : nette quand la carte ne bouge pas.
       const factor = Math.max(1, Math.round((cssSize * pixelRatio) / Math.max(bmp.width, bmp.height)));
       images.set(`ico-${name}`, { data: upscale(bmp, bmp.width, factor), pixelRatio });
@@ -272,5 +329,5 @@ export async function buildMapImages({ blockCss, pixelRatio, pack }) {
     }
   }));
 
-  return { images, fromPack, fromPackIcons };
+  return { images, fromPack, packIcons };
 }

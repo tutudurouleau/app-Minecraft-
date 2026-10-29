@@ -6,7 +6,7 @@
 
 import { loadScript } from './util.js';
 import { idbGet, idbSet, idbDel } from './storage.js';
-import { TEXTURES, ICON_SOURCES } from './textures.js';
+import { TEXTURES, ICON_SOURCES, iconLayers } from './textures.js';
 
 const TEXTURE_ROOT = 'assets/minecraft/textures/';
 
@@ -54,16 +54,17 @@ export async function importPack(file) {
 
   // Icônes « objets du jeu » (boussole, émeraude, cœurs…) : facultatives,
   // on garde notre dessin si l'image n'est pas dans le pack.
+  // Une icône peut demander plusieurs images (ex. potion = liquide + fiole) :
+  // on ne la garde que si toutes sont présentes.
   const icons = {};
   for (const [name, source] of Object.entries(ICON_SOURCES)) {
-    for (const candidate of source.pack || []) {
-      const entry = index.get(candidate);
-      if (entry) {
-        const data = await entry.async('uint8array');
-        icons[name] = new Blob([data], { type: 'image/png' });
-        break;
-      }
+    const blobs = [];
+    for (const layer of iconLayers(source)) {
+      const entry = layer.pack.map((p) => index.get(p)).find(Boolean);
+      if (!entry) { blobs.length = 0; break; }
+      blobs.push(new Blob([await entry.async('uint8array')], { type: 'image/png' }));
     }
+    if (blobs.length) icons[name] = blobs;
   }
   const iconsFound = Object.keys(icons).length;
 
